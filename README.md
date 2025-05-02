@@ -36,8 +36,8 @@ project-root/
 │
 ├── backend/                  # Django project
 │   ├── manage.py
-│   ├── project_name/         # Main Django project folder
-│   └── app_name/             # Django apps (e.g. accounts, hacks)
+│   ├── life-hacks/           # Main Django project folder
+│   └── api/                  # Django apps (e.g. accounts, hacks)
 │
 ├── frontend/
 │   └── life-hacks/           # React (Vite) app source
@@ -47,8 +47,6 @@ project-root/
 │
 ├── .env                      # Environment variables
 ├── docker-compose.yml        # Docker Compose configuration
-├── Dockerfile.backend        # Backend Dockerfile
-├── Dockerfile.frontend       # Frontend Dockerfile
 └── README.md
 ```
 
