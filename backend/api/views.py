@@ -5,9 +5,9 @@ from rest_framework.decorators import action
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from api.models import LifeHack
-from api.serializers import LifeHackSerializer, UserSerializer
-from api.permissions import IsOwnerOrReadOnly
+from api.models import LifeHack, UserProfile, Comment
+from api.serializers import LifeHackSerializer, UserSerializer, UserProfileSerializer, CommentSerializer
+from api.permissions import IsOwnerOrReadOnly, IsProfileOwnerOrReadOnly
 
 User = get_user_model()
 class LifeHackViewSet(ModelViewSet):
@@ -27,5 +27,29 @@ class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
-class UserProfileViewSet():
-    pass
+class UserProfileViewSet(ModelViewSet): # need to test
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsProfileOwnerOrReadOnly]
+
+    def perform_update(self, serializer):
+        # Update the profile with the current logged-in user
+        serializer.save(user=self.request.user)
+    
+    @action(detail=True, methods=['patch'])
+    def update_avatar(self, request, pk=None):
+        user_profile = self.get_object()
+        avatar = request.FILES.get('avatar')
+        if avatar:
+            user_profile.avatar = avatar
+            user_profile.save()
+            return Response({"detail": "Avatar updated successfully."}, status=status.HTTP_200_OK)
+        return Response({"detail": "No avatar provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+class CommentViewSet(ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsProfileOwnerOrReadOnly]
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

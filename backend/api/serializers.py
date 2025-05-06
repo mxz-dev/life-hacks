@@ -15,7 +15,7 @@ class UserProfileMiniSerializer(serializers.ModelSerializer):
         fields = ['id', 'user']
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail', lookup_field='pk')
     followers = UserProfileMiniSerializer(many=True, read_only=True)
     following_set = UserProfileMiniSerializer(many=True, read_only=True)
     class Meta:
@@ -49,7 +49,7 @@ class LifeHackSerializer(serializers.HyperlinkedModelSerializer):
             ]
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail', lookup_field='pk')
     class Meta:
         model = Comment
         fields = ['id', 'user', 'hack', 'content', 'created_at']
