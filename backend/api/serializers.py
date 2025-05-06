@@ -3,10 +3,10 @@ from .models import UserProfile, Tag, LifeHack, Comment
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['url','id', 'username']
 
 class UserProfileMiniSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -28,8 +28,9 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ['id', 'name']
 
-class LifeHackSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
+class LifeHackSerializer(serializers.HyperlinkedModelSerializer):
+    author = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail', lookup_field='pk')
+
     tag = TagSerializer(many=True, read_only=True)
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), source='tag', many=True, write_only=True
