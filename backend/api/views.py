@@ -1,12 +1,13 @@
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from knox.models import AuthToken 
 from api.models import LifeHack, UserProfile, Comment
-from api.serializers import LifeHackSerializer, UserSerializer, UserProfileSerializer, CommentSerializer
+from api.serializers import LifeHackSerializer, UserSerializer, UserProfileSerializer, CommentSerializer, UserRegisterationSerializer
 from api.permissions import IsOwnerOrReadOnly, IsProfileOwnerOrReadOnly
 
 User = get_user_model()
@@ -53,3 +54,22 @@ class CommentViewSet(ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class UserRegisterationAPI(GenericAPIView):
+    """
+        A view for user registration.
+    """
+    serializer_class = UserRegisterationSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token = AuthToken.objects.create(user)[1]
+        return Response({
+            "user": {
+                "id": user.id,
+                "username": user.username,
+            },
+            "token": token
+        })
+    

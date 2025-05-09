@@ -3,6 +3,18 @@ from .models import UserProfile, Tag, LifeHack, Comment
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+
+class UserRegisterationSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=True)
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'password2', 'email', 'first_name', 'last_name']
+        extra_kwargs = {'password': {'write_only': True}}
+    def create(self, validated_data):
+        if validated_data['password'] == validated_data['password2']: 
+            user = User.objects.create_user(username=validated_data['username'],password=validated_data['password'], email=validated_data['email'], first_name=validated_data['first_name'], last_name=validated_data['last_name'])
+            return user
+        raise serializers.ValidationError("Passwords do not match")
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
@@ -54,4 +66,4 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'user', 'hack', 'content', 'created_at']
         read_only_fields = ['id', 'user', 'created_at']
-        
+    

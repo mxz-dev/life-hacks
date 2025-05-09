@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import LifeHackViewSet, UserViewSet, UserProfileViewSet, CommentViewSet
+from .views import LifeHackViewSet, UserViewSet, UserProfileViewSet, CommentViewSet, UserRegisterationAPI
 
 router = DefaultRouter()
 router.register(r'lifehacks', LifeHackViewSet, basename='lifehack')
@@ -10,5 +10,6 @@ router.register(r'comments', CommentViewSet, basename='comment')
 
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('auth/register/', UserRegisterationAPI.as_view(), name='register'),
 ]
