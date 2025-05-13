@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -45,7 +46,26 @@ class UserProfileViewSet(ModelViewSet): # need to test
             user_profile.save()
             return Response({"detail": "Avatar updated successfully."}, status=status.HTTP_200_OK)
         return Response({"detail": "No avatar provided."}, status=status.HTTP_400_BAD_REQUEST)
-
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def follow(self, request, pk=None):
+        target_profile = self.get_object()
+        user_profile = request.user.profile
+        if target_profile == user_profile:
+            return Response({
+                "error":"You can't follow yourself."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        target_profile.followers.add(user_profile)
+        return Response({"success": "Followed successfully!"})
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def unfollow(self, request, pk=None):
+        target_profile = self.get_object()
+        user_profile = request.user.profile
+        if user_profile in  target_profile.followers.all():
+            target_profile.followers.remove(user_profile)
+            return Response({"success":"Unfollowed Successfully!"}, status=status.HTTP_200_OK)
+        return Response({"error": "You are not following this user."}, status=400)
+    
     def perform_destroy(self, instance):
         return Response({"detail": "You cannot delete your profile."}, status=status.HTTP_403_FORBIDDEN)
 class CommentViewSet(ModelViewSet):
