@@ -16,7 +16,14 @@ class UserProfile(models.Model):
     followers = models.ManyToManyField('self', symmetrical=False ,related_query_name="following_user", related_name='following_set', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
+    # def follow(self, user_profile):
+    #     if user_profile != self:
+    #         self.followers.add(user_profile)
+    #         user_profile.following_set.add(self)
+    #         self.save()
+    #         user_profile.save()
+    
     def __str__(self):
         return f'{self.user.username} Profile'
 class LifeHack(models.Model):

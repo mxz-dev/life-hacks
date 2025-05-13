@@ -11,5 +11,5 @@ router.register(r'comments', CommentViewSet, basename='comment')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('auth/register/', UserRegisterationAPI.as_view(), name='register'),
+    path('register/', UserRegisterationAPI.as_view(), name='register'),
 ]

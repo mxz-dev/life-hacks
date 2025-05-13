@@ -5,7 +5,6 @@ from rest_framework.decorators import action
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from knox.models import AuthToken 
 from api.models import LifeHack, UserProfile, Comment
 from api.serializers import LifeHackSerializer, UserSerializer, UserProfileSerializer, CommentSerializer, UserRegisterationSerializer
 from api.permissions import IsOwnerOrReadOnly, IsProfileOwnerOrReadOnly
@@ -47,6 +46,8 @@ class UserProfileViewSet(ModelViewSet): # need to test
             return Response({"detail": "Avatar updated successfully."}, status=status.HTTP_200_OK)
         return Response({"detail": "No avatar provided."}, status=status.HTTP_400_BAD_REQUEST)
 
+    def perform_destroy(self, instance):
+        return Response({"detail": "You cannot delete your profile."}, status=status.HTTP_403_FORBIDDEN)
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -64,12 +65,11 @@ class UserRegisterationAPI(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        token = AuthToken.objects.create(user)[1]
         return Response({
             "user": {
                 "id": user.id,
                 "username": user.username,
+                "email":user.email
             },
-            "token": token
         })
     

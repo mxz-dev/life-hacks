@@ -9,16 +9,17 @@ class UserRegisterationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'password', 'password2', 'email', 'first_name', 'last_name']
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True}, 'password2':{'write_only': True} }
     def create(self, validated_data):
         if validated_data['password'] == validated_data['password2']: 
             user = User.objects.create_user(username=validated_data['username'],password=validated_data['password'], email=validated_data['email'], first_name=validated_data['first_name'], last_name=validated_data['last_name'])
             return user
         raise serializers.ValidationError("Passwords do not match")
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['url','id', 'username']
+        fields = ['url','id', 'username','email', 'first_name', 'last_name']
 
 class UserProfileMiniSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
