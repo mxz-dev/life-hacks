@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework import status
+from rest_framework import status, filters
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from api.models import LifeHack, UserProfile, Comment
@@ -18,7 +18,8 @@ class LifeHackViewSet(ModelViewSet):
     queryset = LifeHack.objects.all()
     serializer_class = LifeHackSerializer
     permission_classes = [IsOwnerOrReadOnly]
-
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title', 'description', 'author__username']
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
     
