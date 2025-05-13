@@ -48,6 +48,8 @@ class LifeHackSerializer(serializers.HyperlinkedModelSerializer):
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), source='tag', many=True, write_only=True
     )
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
     class Meta:
         model = LifeHack
         fields = [
@@ -57,10 +59,18 @@ class LifeHackSerializer(serializers.HyperlinkedModelSerializer):
             'description',
             'tag',
             'tag_ids',
+            'likes_count', 
+            'is_liked',
             'created_at',
             'updated_at',
             ]
+    def get_likes_count(self, obj):
+        return obj.likes.count()
 
+    def get_is_liked(self, obj):
+        user = self.context.get('request').user
+        return user.is_authenticated and user in obj.likes.all()
+    
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail', lookup_field='pk')
     class Meta:

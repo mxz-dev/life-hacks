@@ -22,6 +22,18 @@ class LifeHackViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
     
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def like(self, request, pk=None):
+        hack = self.get_object()
+        user = request.user
+        hack.likes.add(user)
+        return Response({"status":"liked"}, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def unlike(self, request, pk=None):
+        hack = self.get_object()
+        hack.likes.remove(request.user)
+        return Response({"status":"unliked"}, status=status.HTTP_200_OK)
+
 
 class UserViewSet(ReadOnlyModelViewSet):
     queryset = User.objects.all()
@@ -46,6 +58,7 @@ class UserProfileViewSet(ModelViewSet): # need to test
             user_profile.save()
             return Response({"detail": "Avatar updated successfully."}, status=status.HTTP_200_OK)
         return Response({"detail": "No avatar provided."}, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def follow(self, request, pk=None):
         target_profile = self.get_object()
