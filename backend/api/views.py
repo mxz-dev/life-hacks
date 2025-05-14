@@ -4,7 +4,6 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status, filters
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from api.models import LifeHack, UserProfile, Comment
 from api.serializers import (

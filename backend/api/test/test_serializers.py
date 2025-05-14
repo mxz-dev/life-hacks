@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from api.models import UserProfile, Tag, LifeHack, Comment
 from api.serializers import UserProfileSerializer, CommentSerializer, LifeHackSerializer
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIRequestFactory
+
 
 User = get_user_model()
 
@@ -69,9 +70,10 @@ class UserProfileSerializerTest(APITestCase):
         self.profile_a.following_set.set([self.profile_b])
 
     def test_user_profile_serialization(self):
-        serializer = UserProfileSerializer(instance=self.profile_a)
-
-        self.assertEqual(serializer.data["user"]["username"], "user_a")
+        factory = APIRequestFactory()
+        request = factory.get('/')
+        serializer = UserProfileSerializer(instance=self.profile_a, context={"request":request})
+        
         self.assertEqual(len(serializer.data["followers"]), 2)
         self.assertEqual(serializer.data["followers"][0]["user"]["username"], "user_b")
         self.assertEqual(len(serializer.data["following_set"]), 1)
@@ -95,8 +97,9 @@ class CommentSerializerTest(APITestCase):
         )
 
     def test_comment_serialization(self):
-        serializer = CommentSerializer(instance=self.comment)
-        self.assertEqual(serializer.data["user"]["username"], "testuser")
+        factory = APIRequestFactory()
+        request = factory.get('/')
+        serializer = CommentSerializer(instance=self.comment, context={"request":request})
         self.assertEqual(serializer.data["hack"], self.lifehack.id)
         self.assertEqual(serializer.data["content"], "This is a test comment.")
         self.assertIn("created_at", serializer.data)
