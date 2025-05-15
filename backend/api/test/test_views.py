@@ -49,4 +49,43 @@ class UserProfileTest(APITestCase):
         response = self.client.post(f'/api/profiles/{self.target_profile.id}/unfollow/')
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(self.user.profile, self.target_profile.followers.all())
-    
+
+class CommentTest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser3", password="testpassword")
+        self.profile = UserProfile.objects.create(user=self.user)
+        refresh = RefreshToken.for_user(self.user)
+        self.access_token = str(refresh.access_token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
+
+    def test_create_comment(self):
+        # Create a life hack to comment on
+        tag = Tag.objects.create(name="test tag")
+        lifehack = LifeHack.objects.create(
+            title="Test LifeHack",
+            description="Test desc",
+            author=self.user,
+           
+        )
+        lifehack.tag.add(tag)
+        data = {
+            'hack':lifehack.id,
+            'content':"Test comment",
+        }
+        response = self.client.post('/api/comments/', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+
+class UserRegistrationTest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = '/api/register/'
+        self.user_data = {
+            'username': 'testuser4',
+            'password': 'testpassword',
+            'password2': 'testpassword',
+            'email': 'admin@gmail.com',
+            'first_name': 'Test',
+            'last_name': 'User'}
+    def test_create_user(self):
+        response = self.client.post(self.url, data=json.dumps(self.user_data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
